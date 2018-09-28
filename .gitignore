@@ -1,0 +1,19 @@
+# The dataset
+lfw
+
+#Themobilenet pretrained weights
+mobilenet_v2
+
+#My own checkpoints
+mobilenet_v2_checkpoints
+
+__pycache__
+
+saved_model
+
+summaries
+
+Utils/__pycache__
+
+shape_predictor_68_face_landmarks.dat
+
