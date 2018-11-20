@@ -118,11 +118,22 @@ def triplet_loss(anchor, positive, negative, alpha = my_alpha):
     with tf.name_scope('single_trip_loss'):
         delta_1 = tf.square(tf.subtract(anchor, positive))  #square of euclidean distance or L2 norm
         delta_2 = tf.square(tf.subtract(anchor, negative))
-        loss = tf.maximum(tf.reduce_sum(tf.add(tf.subtract(delta_1, delta_2), alpha)), tf.constant(0, dtype = tf.float32))
+        loss = tf.maximum(tf.reduce_sum(tf.square(tf.subtract(delta_1, delta_2))), tf.constant(0, dtype = tf.float32))
     return loss
 
 
-def total_triplet_loss_v1(my_encodings,sess = None):
+def total_triplet_loss_v1(my_encodings):
+    my_encodings = tf.reshape(my_encodings, [3,BATCH_SIZE, 128])
+    my_encodings = tf.unstack(my_encodings)
+    delta_1 = tf.reduce_sum(tf.square(tf.subtract(my_encodings[0], my_encodings[1])), 1)
+    delta_2 = tf.reduce_sum(tf.square(tf.subtract(my_encodings[0], my_encodings[2])), 1)
+        
+    init_loss = tf.add(tf.subtract(delta_1,delta_2), my_alpha)
+    total_loss = tf.reduce_mean(tf.maximum(init_loss, 0), 0)
+    return total_loss
+
+
+def total_triplet_loss_v0(my_encodings,sess = None):
     #my_triplets = tf.unstack(my_encodings)   #This converts [None,128] tensor into list of [128] shaped tensors and we can iterate over this list now
     total_loss = tf.constant(0,dtype = tf.float32, name = 'initial_trip_loss')
     for i in range(BATCH_SIZE):
@@ -179,9 +190,11 @@ def doublet_loss(anchor, positive):
 def total_doublet_loss(my_encodings):
     #My list is of the form [3*batch_size, 128] - 1st represent anchor, 2nd-positive, 3rd-    		negative, 4th-anchor, 5th-positive
     #my_encodings = tf.unstack(my_encodings)
-    total_loss = tf.constant(0,dtype = tf.float32, name = 'initial_trip_loss')
-    for i in range(BATCH_SIZE):
-        total_loss += doublet_loss(my_encodings[(2*i)+0],my_encodings[(2*i)+1]) 
+    my_encodings = tf.reshape(my_encodings, [2,BATCH_SIZE, 128])
+    #total_loss = tf.constant(0,dtype = tf.float32, name = 'initial_trip_loss')
+    total_loss = tf.reduce_sum(tf.square(tf.subtract(my_encodings[0],my_encodings[1])), axis = None)
+    #for i in range(BATCH_SIZE):
+        #total_loss += doublet_loss(my_encodings[(2*i)+0],my_encodings[(2*i)+1]) 
     return total_loss
 
 

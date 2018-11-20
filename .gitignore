@@ -17,3 +17,6 @@ Utils/__pycache__
 
 shape_predictor_68_face_landmarks.dat
 
+Facenet_ckpt
+Results.png
+validate_on_lfw.py

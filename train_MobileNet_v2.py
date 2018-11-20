@@ -10,6 +10,7 @@ import os
 import MNet_v2
 import detect_face 
 
+tfe = tf.contrib.eager
 slim = tf.contrib.slim
 
 saved_model_dir = "saved_model/my_model"  #The protobuf directory
@@ -26,7 +27,7 @@ learning_rate_decay_epochs = 1
 epoch_size = 200
 learning_rate_decay_factor = 1.0
 
-#my_input = utils.doub_inputs(BATCH_SIZE)
+#my_input = utils.doub_inputs
 my_input = utils.inputs
 detect_face = detect_face.Detect_Face(predictor_model,224)
 
@@ -48,7 +49,7 @@ def main():
         with tf.Session(config = config) as sess:
             global_step = tf.Variable(0, trainable=False,name='global_step')
             #with tf.name_scope('my_network'):
-            x = tf.placeholder(tf.float32, [(2*BATCH_SIZE), 224, 224, 3],name = 'x_input')
+            x = tf.placeholder(tf.float32, [None, 224, 224, 3],name = 'x_input')
             learning_rate_placeholder = tf.placeholder(dtype = tf.float32,name = 'learning_rate')
 
             with tf.contrib.slim.arg_scope(MNet_v2.training_scope()):
@@ -68,6 +69,7 @@ def main():
             with tf.name_scope('loss'):
                 with tf.name_scope('triplet_loss'):
                     loss = utils.total_triplet_loss_v1(my_encodings)
+                    #loss = utils.total_doublet_loss(my_encodings)
                 with tf.name_scope('Reg_loss'):
                     regularization_losses = tf.get_collection(tf.GraphKeys.REGULARIZATION_LOSSES)
                 #with tf.name_scope('total_loss'): Not required as name='total_loss' already covers it
@@ -95,7 +97,7 @@ def main():
             #saved_model = tf.saved_model.builder.SavedModelBuilder(saved_model_dir)
             #saved_model.add_meta_graph_and_variables(sess,tags = ['Mnet_face'])
 
-            LEARNING_RATE = 0.0000002
+            LEARNING_RATE = 0.00000002
             for batch1 in my_input(BATCH_SIZE):
             #for i in range(epoch_size):
                 #batch1 = my_input.__next__()
@@ -108,11 +110,12 @@ def main():
                     print ("EPOCH NO. ",my_global_step)
                     print ("TOTAL LOSS:", tota_loss)
                     print ("LEARNING RATE:", lr)
-                    #summ_writer.add_summary(summary, global_step.eval())
+                    summ_writer.add_summary(summary, global_step.eval())
                     j = j + 1
                     LEARNING_RATE = (LEARNING_RATE * 0.99)
-                #saver.save(sess, my_checkpoint_file, global_step = global_step)
+                saver.save(sess, my_checkpoint_file, global_step = global_step)
                 #saved_model.save()
+
 
 
 

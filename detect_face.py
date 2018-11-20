@@ -41,6 +41,9 @@ class Detect_Face:
 		
 
 	def multi_image_detect_face(self, file_names):
+		"""
+		file_names : list containing the paths of the images
+		"""
 		faces = []
 		#print (len(file_names))
 		for file_name in file_names:
@@ -57,12 +60,13 @@ class Detect_Face:
 		return face_stack
 
 if __name__ == '__main__':
-	file_name = "Anja_Paerson_0001.jpg"
+	file_name = "lfw/Aaron_Peirsol/Aaron_Peirsol_0002.jpg"
 	image = cv2.imread(file_name)
-	image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
-	test = Detect_Face(predictor_model)
+	#image = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)
+	test = Detect_Face(predictor_model,160)
 	alignedFace = test.detect_face(image)
 	print (alignedFace.shape, alignedFace.dtype)
+	cv2.imwrite('aligned_face.jpg',alignedFace)
 	cv2.imshow('Aligned face', alignedFace)
 	cv2.waitKey(0)
 	cv2.destroyAllWindows
